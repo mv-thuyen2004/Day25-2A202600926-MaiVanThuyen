@@ -102,3 +102,23 @@ def spot_checkpoint_cost(
         "on_demand_cost": round(on_demand_cost, 2),
         "savings_pct": round(savings_pct, 1),
     }
+
+
+def cache_is_worth_it(
+    avg_cache_reads: float,
+    write_cost_per_m: float,
+    read_discount: float = 0.10,
+) -> bool:
+    """Evaluate whether cache writing is economically viable.
+    
+    Writing cost: write_cost_per_m.
+    Savings per read: write_cost_per_m * (1 - read_discount).
+    With avg_cache_reads, cache is viable if:
+      avg_cache_reads * write_cost_per_m * (1 - read_discount) > write_cost_per_m
+    which simplifies to:
+      avg_cache_reads * (1 - read_discount) > 1.0
+    """
+    if write_cost_per_m <= 0:
+        return False
+    return avg_cache_reads * (1.0 - read_discount) > 1.0
+

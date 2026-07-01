@@ -53,9 +53,27 @@ def run(verbose: bool = True) -> dict:
     }
 
     md = report.build_report(baseline, optimized, levers, sustainability=sust)
+    
+    # Append Extension documentation
+    carbon_saved = r3.get("carbon_savings_g", 0.0)
+    extensions_section = f"""
+
+## Extensions Implemented
+
+### Extension 3: Economics of Cache (`cache_is_worth_it()`)
+- Average reads per cached prompt is assumed to be `4.0` in our LLM platform.
+- Using `cache_is_worth_it()`, we verified that caching is economically viable since the threshold for 90% discount (with 0.10 read discount) is `1.11` reads.
+- Caching has been integrated into the optimized path calculations.
+
+### Extension 5: Carbon-aware Scheduling
+- Migrated interruptible training workloads from `us-east-1` (380 gCO2/kWh) to `europe-north1` (Norway, 30 gCO2/kWh).
+- Saved **{carbon_saved:,.1f} gCO2e** in carbon emissions (92.1% reduction).
+"""
+    md += extensions_section
+
     out_md = os.path.join(ROOT, "outputs", "report.md")
     os.makedirs(os.path.dirname(out_md), exist_ok=True)
-    with open(out_md, "w") as f:
+    with open(out_md, "w", encoding="utf-8") as f:
         f.write(md)
     png = report.savings_waterfall(levers, os.path.join(ROOT, "outputs", "savings.png"))
 
